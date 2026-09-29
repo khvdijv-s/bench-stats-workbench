@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1E2530;
+  --ink-soft:#4A5568;
+  --paper:#F1F3EF;
+  --paper-grid:rgba(30,37,48,0.05);
+  --panel:#FFFFFF;
+  --panel-border:rgba(30,37,48,0.14);
+  --panel-border-strong:rgba(30,37,48,0.28);
+  --sidebar-bg:#161F29;
+  --sidebar-text:#AEB9C4;
+  --sidebar-text-active:#FFFFFF;
+  --sidebar-active-bg:rgba(255,255,255,0.08);
+  --accent:#1F7A6C;
+  --accent-ink:#0E4B41;
+  --accent-soft:rgba(31,122,108,0.13);
+  --highlight:#6B4E8E;
+  --highlight-soft:rgba(107,78,142,0.13);
+  --group-a:#2E5C8A;
+  --group-b:#B23A3A;
+  --group-c:#C98A2C;
+  --group-d:#3F8F5F;
+  --group-e:#8A4E9E;
+  --group-f:#3E7C8C;
+  --success:#3F8F5F;
+  --success-soft:rgba(63,143,95,0.13);
+  --warn:#B8791F;
+  --warn-soft:rgba(184,121,31,0.14);
+  --danger:#B23A3A;
+  --danger-soft:rgba(178,58,58,0.12);
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',monospace;
+  --radius:7px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E7E9EA;
+    --ink-soft:#9AA5B1;
+    --paper:#12161B;
+    --paper-grid:rgba(255,255,255,0.045);
+    --panel:#1A2028;
+    --panel-border:rgba(255,255,255,0.12);
+    --panel-border-strong:rgba(255,255,255,0.22);
+    --sidebar-bg:#0C1116;
+    --accent-soft:rgba(46,166,148,0.16);
+    --highlight-soft:rgba(150,120,190,0.18);
+    --success-soft:rgba(80,170,115,0.16);
+    --warn-soft:rgba(210,150,60,0.16);
+    --danger-soft:rgba(210,90,90,0.16);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E7E9EA; --ink-soft:#9AA5B1; --paper:#12161B; --paper-grid:rgba(255,255,255,0.045);
+  --panel:#1A2028; --panel-border:rgba(255,255,255,0.12); --panel-border-strong:rgba(255,255,255,0.22);
+  --sidebar-bg:#0C1116; --accent-soft:rgba(46,166,148,0.16); --highlight-soft:rgba(150,120,190,0.18);
+  --success-soft:rgba(80,170,115,0.16); --warn-soft:rgba(210,150,60,0.16); --danger-soft:rgba(210,90,90,0.16);
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
+body{
+  font-family:var(--font-ui);
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+#app{
+  display:flex;
+  min-height:100%;
+  min-height:100vh;
+}
+/* ---------- sidebar ---------- */
+.rail{
+  width:200px;
+  flex:0 0 200px;
+  background:var(--sidebar-bg);
+  color:var(--sidebar-text);
+  display:flex;
+  flex-direction:column;
+  padding:20px 12px;
+  padding-top:calc(20px + env(safe-area-inset-top,0px));
+  position:sticky;
+  top:0;
+  align-self:flex-start;
+  height:100vh;
+}
+.brand{
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  padding:4px 10px 18px 10px;
+  border-bottom:1px solid rgba(255,255,255,0.09);
+  margin-bottom:14px;
+}
+.brand-mark{
+  width:9px;height:9px;border-radius:2px;background:var(--accent);
+  flex:none;transform:rotate(45deg);
+}
+.brand-name{font-size:17px;font-weight:600;color:#fff;letter-spacing:0.2px;}
+.brand-sub{font-size:10.5px;color:#7C8896;font-family:var(--font-mono);}
+.rail nav{display:flex;flex-direction:column;gap:2px;}
+.rail-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:6px;border:none;background:transparent;
+  color:var(--sidebar-text);font-family:var(--font-ui);font-size:13.5px;font-weight:500;
+  cursor:pointer;text-align:left;width:100%;
+}
+.rail-btn svg{flex:none;width:16px;height:16px;opacity:0.85;}
+.rail-btn:hover{background:rgba(255,255,255,0.05);color:#fff;}
+.rail-btn.active{background:var(--sidebar-active-bg);color:var(--sidebar-text-active);}
+.rail-btn.active svg{opacity:1;color:var(--accent);}
+.rail-foot{margin-top:auto;padding:10px;font-size:10.5px;color:#5C6875;font-family:var(--font-mono);line-height:1.5;}
+
+/* ---------- main ---------- */
+main{
+  flex:1;
+  min-width:0;
+  background-image:
+    linear-gradient(var(--paper-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  padding:34px 40px 60px 40px;
+}
+.tab-panel{display:none;max-width:1080px;margin:0 auto;}
+.tab-panel.active{display:block;}
+.page-head{margin-bottom:26px;}
+.page-title{font-size:22px;font-weight:600;margin:0 0 4px 0;letter-spacing:-0.2px;}
+.page-desc{font-size:13.5px;color:var(--ink-soft);margin:0;max-width:640px;line-height:1.5;}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--panel-border);
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:18px;
+}
+.panel h3{font-size:13px;text-transform:none;font-weight:600;margin:0 0 14px 0;color:var(--ink);
+  display:flex;align-items:center;gap:8px;}
+.panel h3 .tag{font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--ink-soft);
+  background:var(--paper-grid);padding:2px 6px;border-radius:4px;}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.row + .row{margin-top:10px;}
+.spacer{flex:1;}
+
+button{font-family:var(--font-ui);cursor:pointer;}
+.btn{
+  padding:8px 14px;border-radius:6px;border:1px solid var(--panel-border-strong);
+  background:var(--panel);color:var(--ink);font-size:12.5px;font-weight:500;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent-ink);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn.primary:hover{filter:brightness(1.08);color:#fff;}
+.btn.ghost{border-color:transparent;background:transparent;}
+.btn.ghost:hover{background:var(--paper-grid);border-color:transparent;color:var(--ink);}
+.btn.small{padding:5px 10px;font-size:11.5px;}
+.btn:disabled{opacity:0.45;cursor:not-allowed;}
+.btn:disabled:hover{border-color:var(--panel-border-strong);color:var(--ink);}
+
+input[type=text],input[type=number],select,textarea{
+  font-family:var(--font-mono);font-size:12.5px;
+  border:1px solid var(--panel-border-strong);border-radius:5px;
+  padding:6px 8px;background:var(--panel);color:var(--ink);
+}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus,button:focus-visible{
+  outline:2px solid var(--accent);outline-offset:1px;
+}
+label.field{font-size:11.5px;color:var(--ink-soft);font-weight:500;display:flex;flex-direction:column;gap:4px;}
+select{font-family:var(--font-ui);}
+
+/* data table */
+.datagrid-wrap{overflow-x:auto;border:1px solid var(--panel-border);border-radius:6px;}
+table.datagrid{border-collapse:collapse;width:100%;min-width:420px;}
+table.datagrid th, table.datagrid td{
+  border-bottom:1px solid var(--panel-border);border-right:1px solid var(--panel-border);
+  padding:0;text-align:center;
+}
+table.datagrid th:last-child, table.datagrid td:last-child{border-right:none;}
+table.datagrid thead th{background:var(--paper);padding:8px 6px;}
+.col-head{display:flex;flex-direction:column;gap:6px;align-items:center;padding:4px 2px 8px 2px;}
+.col-head input[type=text]{width:100%;min-width:96px;text-align:center;font-family:var(--font-ui);font-weight:600;font-size:12px;border:1px solid transparent;background:transparent;}
+.col-head input[type=text]:hover,.col-head input[type=text]:focus{border-color:var(--panel-border-strong);background:var(--panel);}
+.swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,0.2);cursor:pointer;flex:none;}
+.col-actions{display:flex;gap:4px;}
+td.rownum{font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);background:var(--paper);width:30px;}
+td input[type=text]{width:100%;min-width:64px;border:none;text-align:center;padding:7px 4px;border-radius:0;background:transparent;color:var(--ink);}
+td input[type=text].nd{color:var(--warn);font-weight:600;}
+td input[type=text]:focus{background:var(--accent-soft);}
+.desc-row td{background:var(--paper);font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);padding:5px 4px;}
+
+.chip{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;
+  font-size:11px;font-weight:500;font-family:var(--font-mono);
+}
+.chip.ok{background:var(--success-soft);color:var(--success);}
+.chip.warn{background:var(--warn-soft);color:var(--warn);}
+.chip.bad{background:var(--danger-soft);color:var(--danger);}
+.chip.info{background:var(--accent-soft);color:var(--accent-ink);}
+
+.checkline{display:flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 0;}
+.checkline input{accent-color:var(--accent);}
+
+.stat-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:12px;}
+.stat-table th{text-align:left;font-family:var(--font-ui);font-weight:600;font-size:11.5px;color:var(--ink-soft);
+  padding:6px 10px;border-bottom:1px solid var(--panel-border-strong);}
+.stat-table td{padding:6px 10px;border-bottom:1px solid var(--panel-border);}
+.stat-table tr:last-child td{border-bottom:none;}
+.stat-table .swatch-cell{display:flex;align-items:center;gap:7px;font-family:var(--font-ui);font-weight:500;}
+
+.result-card{
+  border:1px solid var(--panel-border-strong);border-radius:8px;padding:16px 18px;
+  background:linear-gradient(180deg, var(--accent-soft), transparent 65%);
+  margin-top:4px;
+}
+.result-card .headline{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.result-card .p-big{font-family:var(--font-mono);font-size:26px;font-weight:600;color:var(--ink);}
+.result-card .test-name{font-size:13px;font-weight:600;color:var(--ink);}
+.result-card .verdict{font-size:12px;font-weight:600;padding:2px 9px;border-radius:20px;}
+.result-card .verdict.sig{background:var(--success-soft);color:var(--success);}
+.result-card .verdict.ns{background:var(--panel-border);color:var(--ink-soft);}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:8px;}
+.result-grid div{font-family:var(--font-mono);font-size:11.5px;}
+.result-grid .k{color:var(--ink-soft);display:block;font-family:var(--font-ui);font-size:10.5px;margin-bottom:2px;}
+
+.callout{border-radius:7px;padding:12px 14px;font-size:12.5px;line-height:1.55;border:1px solid transparent;}
+.callout.note{background:var(--accent-soft);border-color:rgba(31,122,108,0.25);}
+.callout.warn{background:var(--warn-soft);border-color:rgba(184,121,31,0.3);}
+
+::-webkit-scrollbar{height:9px;width:9px;}
+::-webkit-scrollbar-thumb{background:var(--panel-border-strong);border-radius:5px;}
+
+@media (max-width: 760px){
+  #app{flex-direction:column;}
+  .rail{
+    width:100%;flex:none;height:auto;position:sticky;top:0;z-index:5;
+    flex-direction:row;align-items:center;padding:10px 12px;
+    padding-top:calc(10px + env(safe-area-inset-top,0px));
+    overflow-x:auto;
+  }
+  .brand{border-bottom:none;margin-bottom:0;padding:4px 10px 4px 0;flex:none;}
+  .rail nav{flex-direction:row;gap:2px;}
+  .rail-btn span{display:none;}
+  .rail-btn{padding:8px;}
+  .rail-btn svg{width:18px;height:18px;}
+  .rail-foot{display:none;}
+  main{padding:20px 14px 40px 14px;}
+  .row{flex-wrap:wrap;}
+  #tab-plot .row[style*="flex-start"]{flex-direction:column;}
+  #tab-plot .panel[style*="260px"]{flex:1 1 100%;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-name">Bench</div>
+        <div class="brand-sub">stats workbench</div>
+      </div>
+    </div>
+    <nav id="tabnav"></nav>
+    <div class="rail-foot">v0.1 — not yet named<br>your data stays in this tab</div>
+  </aside>
+  <main id="main-content"></main>
+</div>
+<script>
+/* =========================================================================
+   STATS ENGINE (validated against scipy — see build notes)
+   ========================================================================= */
+// ---------- basic descriptive ----------
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length;}
+function variance(a){ // sample variance (n-1)
+  const m=mean(a);
+  return a.reduce((s,v)=>s+(v-m)*(v-m),0)/(a.length-1);
+}
+function sd(a){return Math.sqrt(variance(a));}
+function sem(a){return sd(a)/Math.sqrt(a.length);}
+function median(a){const s=[...a].sort((x,y)=>x-y);const n=s.length;return n%2? s[(n-1)/2] : (s[n/2-1]+s[n/2])/2;}
+
+// ---------- special functions ----------
+function erf(x){
+  // Abramowitz-Stegun 7.1.26
+  const sign = x<0?-1:1; x=Math.abs(x);
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const t=1/(1+p*x);
+  const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+  return sign*y;
+}
+function normalCDF(x){return 0.5*(1+erf(x/Math.sqrt(2)));}
+
+function logGamma(x){
+  // Lanczos approximation
+  const g=7;
+  const c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,
+    771.32342877765313,-176.61502916214059,12.507343278686905,
+    -0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(x<0.5){
+    return Math.log(Math.PI/Math.sin(Math.PI*x))-logGamma(1-x);
+  }
+  x-=1;
+  let a=c[0];
+  const t=x+g+0.5;
+  for(let i=1;i<g+2;i++) a+=c[i]/(x+i);
+  return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);
+}
+
+function betacf(a,b,x){
+  const MAXIT=200, EPS=3e-9, FPMIN=1e-30;
+  let qab=a+b, qap=a+1, qam=a-1;
+  let c=1, d=1-qab*x/qap;
+  if(Math.abs(d)<FPMIN) d=FPMIN;
+  d=1/d;
+  let h=d;
+  for(let m=1;m<=MAXIT;m++){
+    const m2=2*m;
+    let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN;
+    c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN;
+    d=1/d; h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN;
+    c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN;
+    d=1/d;
+    const del=d*c; h*=del;
+    if(Math.abs(del-1)<EPS) break;
+  }
+  return h;
+}
+function betainc(a,b,x){
+  // regularized incomplete beta
+  if(x<=0) return 0;
+  if(x>=1) return 1;
+  const bt=Math.exp(logGamma(a+b)-logGamma(a)-logGamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  if(x < (a+1)/(a+b+2)) return bt*betacf(a,b,x)/a;
+  else return 1-bt*betacf(b,a,1-x)/b;
+}
+
+function tCDF(t,df){
+  // returns P(T <= t)
+  const x = df/(df+t*t);
+  const p = 0.5*betainc(df/2,0.5,x);
+  return t>0 ? 1-p : p;
+}
+function tTwoTailP(t,df){
+  const at=Math.abs(t);
+  const x=df/(df+at*at);
+  return betainc(df/2,0.5,x);
+}
+function fUpperP(F,df1,df2){
+  // P(X >= F) for F-distribution
+  if(F<=0) return 1;
+  const x = df2/(df2+df1*F);
+  return betainc(df2/2, df1/2, x);
+}
+function chiSqUpperP(x, df){
+  // upper tail P(X>=x) using regularized upper incomplete gamma
+  return upperIncGamma(df/2, x/2);
+}
+function lowerIncGammaSeries(a,x){
+  let sum=1/a, term=sum, n=a;
+  for(let i=0;i<500;i++){
+    n+=1; term*=x/n; sum+=term;
+    if(Math.abs(term)<Math.abs(sum)*1e-14) break;
+  }
+  return sum*Math.exp(-x+a*Math.log(x)-logGamma(a));
+}
+function upperIncGammaCF(a,x){
+  const MAXIT=200, EPS=3e-12, FPMIN=1e-300;
+  let b=x+1-a, c=1/FPMIN, d=1/b, h=d;
+  for(let i=1;i<=MAXIT;i++){
+    const an=-i*(i-a);
+    b+=2;
+    d=an*d+b; if(Math.abs(d)<FPMIN) d=FPMIN;
+    c=b+an/c; if(Math.abs(c)<FPMIN) c=FPMIN;
+    d=1/d;
+    const del=d*c; h*=del;
+    if(Math.abs(del-1)<EPS) break;
+  }
+  return Math.exp(-x+a*Math.log(x)-logGamma(a))*h;
+}
+function upperIncGamma(a,x){ // regularized Q(a,x)
+  if(x<0||a<=0) return NaN;
+  if(x===0) return 1;
+  if(x < a+1){
+    return 1-lowerIncGammaSeries(a,x);
+  } else {
+    return upperIncGammaCF(a,x);
+  }
+}
+
+// ---------- rank helper (average ties) ----------
+function rankData(values){
+  const idx = values.map((v,i)=>i).sort((i,j)=>values[i]-values[j]);
+  const ranks = new Array(values.length);
+  let i=0;
+  while(i<idx.length){
+    let j=i;
+    while(j+1<idx.length && values[idx[j+1]]===values[idx[i]]) j++;
+    const avgRank=(i+j)/2+1; // 1-based
+    for(let k=i;k<=j;k++) ranks[idx[k]]=avgRank;
+    i=j+1;
+  }
+  return ranks;
+}
+
+// ---------- tests ----------
+function ttestInd(a,b,equalVar){
+  const ma=mean(a), mb=mean(b), va=variance(a), vb=variance(b), na=a.length, nb=b.length;
+  let t, df;
+  if(equalVar){
+    const sp2=((na-1)*va+(nb-1)*vb)/(na+nb-2);
+    const se=Math.sqrt(sp2*(1/na+1/nb));
+    t=(ma-mb)/se;
+    df=na+nb-2;
+  } else {
+    const se=Math.sqrt(va/na+vb/nb);
+    t=(ma-mb)/se;
+    df=Math.pow(va/na+vb/nb,2)/( Math.pow(va/na,2)/(na-1) + Math.pow(vb/nb,2)/(nb-1) );
+  }
+  const p=tTwoTailP(t,df);
+  const pooledSD=Math.sqrt(((na-1)*va+(nb-1)*vb)/(na+nb-2));
+  const cohensD=(ma-mb)/pooledSD;
+  return {t,df,p,meanA:ma,meanB:mb,cohensD};
+}
+function ttestPaired(a,b){
+  const d=a.map((v,i)=>v-b[i]);
+  const md=mean(d), sdd=sd(d), n=d.length;
+  const t=md/(sdd/Math.sqrt(n));
+  const df=n-1;
+  const p=tTwoTailP(t,df);
+  return {t,df,p,meanDiff:md};
+}
+function oneWayANOVA(groups){
+  const all=groups.flat();
+  const grand=mean(all);
+  const k=groups.length, N=all.length;
+  let ssBetween=0, ssWithin=0;
+  for(const g of groups){
+    const m=mean(g);
+    ssBetween += g.length*(m-grand)**2;
+    for(const v of g) ssWithin += (v-m)**2;
+  }
+  const dfB=k-1, dfW=N-k;
+  const msB=ssBetween/dfB, msW=ssWithin/dfW;
+  const F=msB/msW;
+  const p=fUpperP(F,dfB,dfW);
+  const etaSq=ssBetween/(ssBetween+ssWithin);
+  return {F,dfB,dfW,p,etaSq,ssBetween,ssWithin};
+}
+function pairwiseTTestsBonferroni(groupsObj){
+  // groupsObj: {name: [...values]}
+  const names=Object.keys(groupsObj);
+  const results=[];
+  const m = names.length*(names.length-1)/2;
+  for(let i=0;i<names.length;i++){
+    for(let j=i+1;j<names.length;j++){
+      const r=ttestInd(groupsObj[names[i]],groupsObj[names[j]],false);
+      results.push({a:names[i],b:names[j],t:r.t,df:r.df,p:r.p,pAdj:Math.min(r.p*m,1)});
+    }
+  }
+  return results;
+}
+function mannWhitneyU(a,b){
+  const na=a.length, nb=b.length;
+  const combined=a.map(v=>({v,g:'a'})).concat(b.map(v=>({v,g:'b'})));
+  const values=combined.map(x=>x.v);
+  const ranks=rankData(values);
+  let Ra=0;
+  for(let i=0;i<combined.length;i++) if(combined[i].g==='a') Ra+=ranks[i];
+  const Ua=Ra-na*(na+1)/2;
+  const Ub=na*nb-Ua;
+  const U=Math.min(Ua,Ub);
+  // tie correction
+  const sortedVals=[...values].sort((x,y)=>x-y);
+  let tieSum=0;
+  let i=0;
+  while(i<sortedVals.length){
+    let j=i;
+    while(j+1<sortedVals.length && sortedVals[j+1]===sortedVals[i]) j++;
+    const tcount=j-i+1;
+    if(tcount>1) tieSum += (tcount**3-tcount);
+    i=j+1;
+  }
+  const N=na+nb;
+  const muU=na*nb/2;
+  const sigmaU=Math.sqrt(na*nb/12*((N+1)-tieSum/(N*(N-1))));
+  let z;
+  if(Ua>=muU) z=(Ua-muU-0.5)/sigmaU;
+  else z=(Ua-muU+0.5)/sigmaU;
+  const p=2*(1-normalCDF(Math.abs(z)));
+  return {U,Ua,Ub,z,p:Math.min(p,1)};
+}
+function wilcoxonSignedRank(a,b){
+  const d=a.map((v,i)=>v-b[i]).filter(x=>x!==0);
+  const absd=d.map(Math.abs);
+  const ranks=rankData(absd);
+  let Wpos=0, Wneg=0;
+  for(let i=0;i<d.length;i++){
+    if(d[i]>0) Wpos+=ranks[i]; else Wneg+=ranks[i];
+  }
+  const n=d.length;
+  const W=Math.min(Wpos,Wneg);
+  const muW=n*(n+1)/4;
+  const sigmaW=Math.sqrt(n*(n+1)*(2*n+1)/24);
+  const z=(W-muW+0.5)/sigmaW; // continuity correction toward 0
+  const p=2*(1-normalCDF(Math.abs(z)));
+  return {W,Wpos,Wneg,z,p:Math.min(p,1)};
+}
+function kruskalWallis(groups){
+  const all=[];
+  groups.forEach((g,gi)=>g.forEach(v=>all.push({v,gi})));
+  const values=all.map(x=>x.v);
+  const ranks=rankData(values);
+  const N=all.length;
+  const k=groups.length;
+  const Rsum=new Array(k).fill(0);
+  for(let i=0;i<all.length;i++) Rsum[all[i].gi]+=ranks[i];
+  let H=0;
+  for(let gi=0;gi<k;gi++){
+    H += (Rsum[gi]*Rsum[gi])/groups[gi].length;
+  }
+  H = (12/(N*(N+1)))*H - 3*(N+1);
+  // tie correction
+  const sortedVals=[...values].sort((x,y)=>x-y);
+  let tieSum=0, i=0;
+  while(i<sortedVals.length){
+    let j=i;
+    while(j+1<sortedVals.length && sortedVals[j+1]===sortedVals[i]) j++;
+    const t=j-i+1;
+    if(t>1) tieSum+=(t**3-t);
+    i=j+1;
+  }
+  const C=1-tieSum/(N**3-N);
+  const Hc=H/C;
+  const df=k-1;
+  const p=chiSqUpperP(Hc,df);
+  return {H:Hc,df,p};
+}
+function pearson(x,y){
+  const n=x.length, mx=mean(x), my=mean(y);
+  let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){sxy+=(x[i]-mx)*(y[i]-my); sxx+=(x[i]-mx)**2; syy+=(y[i]-my)**2;}
+  const r=sxy/Math.sqrt(sxx*syy);
+  const df=n-2;
+  const t=r*Math.sqrt(df/(1-r*r));
+  const p=tTwoTailP(t,df);
+  return {r,p,df,t};
+}
+function spearman(x,y){
+  const rx=rankData(x), ry=rankData(y);
+  return pearson(rx,ry);
+}
+function linearRegression(x,y){
+  const n=x.length, mx=mean(x), my=mean(y);
+  let sxy=0,sxx=0;
+  for(let i=0;i<n;i++){sxy+=(x[i]-mx)*(y[i]-my); sxx+=(x[i]-mx)**2;}
+  const slope=sxy/sxx;
+  const intercept=my-slope*mx;
+  let ssRes=0, ssTot=0;
+  for(let i=0;i<n;i++){
+    const pred=slope*x[i]+intercept;
+    ssRes+=(y[i]-pred)**2;
+    ssTot+=(y[i]-my)**2;
+  }
+  const r2=1-ssRes/ssTot;
+  const df=n-2;
+  const seSlope=Math.sqrt((ssRes/df)/sxx);
+  const t=slope/seSlope;
+  const p=tTwoTailP(t,df);
+  return {slope,intercept,r2,p,df};
+}
+function dagostinoK2(x){
+  const n=x.length;
+  const m=mean(x);
+  const m2=x.reduce((s,v)=>s+(v-m)**2,0)/n;
+  const m3=x.reduce((s,v)=>s+(v-m)**3,0)/n;
+  const m4=x.reduce((s,v)=>s+(v-m)**4,0)/n;
+  const g1=m3/Math.pow(m2,1.5); // skewness
+  const g2=m4/(m2*m2)-3; // excess kurtosis
+
+  // skewness test statistic (Zi) - D'Agostino 1970
+  const Y=g1*Math.sqrt((n+1)*(n+3)/(6*(n-2)));
+  const beta2=3*(n*n+27*n-70)*(n+1)*(n+3)/((n-2)*(n+5)*(n+7)*(n+9));
+  const Wsq=-1+Math.sqrt(2*(beta2-1));
+  const delta=1/Math.sqrt(Math.log(Math.sqrt(Wsq)));
+  const alpha=Math.sqrt(2/(Wsq-1));
+  const Zs=delta*Math.log(Y/alpha+Math.sqrt((Y/alpha)**2+1));
+
+  // kurtosis test statistic (Zk) - D'Agostino, Belanger, D'Agostino (1990),
+  // matches scipy.stats.kurtosistest
+  const g2c = g2+3; // convert excess kurtosis back to raw kurtosis (b2)
+  const Eb2=3*(n-1)/(n+1);
+  const varB2=24*n*(n-2)*(n-3)/((n+1)*(n+1)*(n+3)*(n+5));
+  const x_=(g2c-Eb2)/Math.sqrt(varB2);
+  const sqrtBeta1=(6*(n*n-5*n+2)/((n+7)*(n+9)))*Math.sqrt((6*(n+3)*(n+5))/(n*(n-2)*(n-3)));
+  const A=6+8/sqrtBeta1*(2/sqrtBeta1+Math.sqrt(1+4/(sqrtBeta1*sqrtBeta1)));
+  const term1=1-2/(9*A);
+  const denom=1+x_*Math.sqrt(2/(A-4));
+  const term2=Math.sign(denom)*Math.pow(Math.abs((1-2/A)/denom),1/3);
+  const Zk=(term1-term2)/Math.sqrt(2/(9*A));
+
+  const K2=Zs*Zs+Zk*Zk;
+  const p=chiSqUpperP(K2,2);
+  return {K2,p,skew:g1,kurtosis:g2, Zs, Zk};
+}
+function brownForsythe(groups){
+  // ANOVA on |x - median| per group
+  const dev=groups.map(g=>{
+    const med=median(g);
+    return g.map(v=>Math.abs(v-med));
+  });
+  const res=oneWayANOVA(dev);
+  return {F:res.F,dfB:res.dfB,dfW:res.dfW,p:res.p};
+}
+
+/* =========================================================================
+   APP STATE
+   ========================================================================= */
+const PALETTE = ['#2E5C8A','#B23A3A','#C98A2C','#3F8F5F','#8A4E9E','#3E7C8C'];
+let uidCounter = 1;
+function uid(prefix){ return prefix + (uidCounter++); }
+
+function makeGroup(name, color, values){
+  return { id: uid('grp'), name, color, values: values.slice() };
+}
+// cell value representation: a number, or null (missing/ND)
+const state = {
+  groups: [
+    makeGroup('Group A', PALETTE[0], [null,null,null,null,null,null,null,null]),
+    makeGroup('Group B', PALETTE[1], [null,null,null,null,null,null,null,null]),
+  ],
+  ndMode: 'lodhalf',   // 'lodhalf' | 'exclude'
+  lod: 40,
+  analysis: {
+    selectedIds: [],
+    mode: 'two',        // 'two' | 'multi' | 'corr'
+    paired: false,
+    testKey: null,
+    lastResult: null,   // {p, testLabel, groupIds:[a,b]} used by Plot tab bracket
+  },
+  plot: {
+    chartType: 'bar',   // 'bar' | 'box'
+    errorType: 'sem',   // 'sem' | 'sd' | 'ci95'
+    showPoints: true,
+    showSig: true,
+    title: 'Untitled plot',
+    yLabel: 'Value',
+    log: false,
+  },
+  ask: {
+    history: [], // {role, content}
+  },
+};
+
+function resolvedValues(g){
+  // returns numeric array applying ND handling
+  const out=[];
+  for(const v of g.values){
+    if(v===null || v===undefined || Number.isNaN(v)){
+      if(state.ndMode==='lodhalf') out.push(state.lod/2);
+      // else: excluded
+    } else out.push(v);
+  }
+  return out;
+}
+function ndCount(g){ return g.values.filter(v=>v===null||v===undefined||Number.isNaN(v)).length; }
+
+/* =========================================================================
+   ICONS (inline SVG, stroke-based, consistent 1.6px weight)
+   ========================================================================= */
+const ICONS = {
+  data:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M3.5 9.5h17M3.5 14.5h17M9.5 4v16M15 4v16"/></svg>',
+  analyze: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10M12 20V4M20 20v-6"/><circle cx="4" cy="8" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="2.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="20" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  plot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V6M4 20h16" stroke-linecap="round"/><rect x="6.5" y="13" width="3" height="7" fill="currentColor" stroke="none" opacity=".85"/><rect x="12" y="9" width="3" height="11" fill="currentColor" stroke="none" opacity=".85"/><rect x="17.5" y="15.5" width="3" height="4.5" fill="currentColor" stroke="none" opacity=".85"/></svg>',
+  guide: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.7v3.6l2.4 1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  ask: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5.5h16v10H9.5L5 19v-3.5H4z" stroke-linejoin="round"/></svg>',
+};
+
+const TABS = [
+  {id:'data', label:'Data'},
+  {id:'analyze', label:'Analyze'},
+  {id:'plot', label:'Plot'},
+  {id:'guide', label:'Test guide'},
+  {id:'ask', label:'Ask'},
+];
+let activeTab = 'data';
+
+function setActiveTab(id){
+  activeTab = id;
+  document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+id));
+  if(id==='analyze') renderAnalyzeTab();
+  if(id==='plot') renderPlotTab();
+  if(id==='guide') renderGuideTab();
+  if(id==='ask') renderAskTab();
+}
+
+function buildShell(){
+  const nav = document.getElementById('tabnav');
+  nav.innerHTML = TABS.map(t=>
+    `<button class="rail-btn${t.id==='data'?' active':''}" data-tab="${t.id}">${ICONS[t.id]}<span>${t.label}</span></button>`
+  ).join('');
+  nav.querySelectorAll('.rail-btn').forEach(b=>{
+    b.addEventListener('click', ()=>setActiveTab(b.dataset.tab));
+  });
+  const main = document.getElementById('main-content');
+  main.innerHTML = `
+    <section id="tab-data" class="tab-panel active"></section>
+    <section id="tab-analyze" class="tab-panel"></section>
+    <section id="tab-plot" class="tab-panel"></section>
+    <section id="tab-guide" class="tab-panel"></section>
+    <section id="tab-ask" class="tab-panel"></section>
+  `;
+}
+
+/* =========================================================================
+   DATA TAB
+   ========================================================================= */
+function nRows(){ return Math.max(...state.groups.map(g=>g.values.length), 1); }
+
+function renderDataTab(){
+  const el = document.getElementById('tab-data');
+  const rows = nRows();
+  let theadCols = state.groups.map(g=>`
+    <th>
+      <div class="col-head">
+        <div class="row" style="gap:6px;">
+          <span class="swatch" style="background:${g.color}" data-swatch="${g.id}" title="Click to change color"></span>
+          <input type="text" value="${escapeAttr(g.name)}" data-rename="${g.id}">
+        </div>
+        <div class="col-actions">
+          <button class="btn small ghost" data-addrow="${g.id}" title="Add a value">+ row</button>
+          <button class="btn small ghost" data-delgroup="${g.id}" title="Remove group">✕</button>
+        </div>
+      </div>
+    </th>`).join('');
+
+  let bodyRows = '';
+  for(let r=0;r<rows;r++){
+    bodyRows += `<tr><td class="rownum">${r+1}</td>`;
+    for(const g of state.groups){
+      const v = g.values[r];
+      const isND = (v===null||v===undefined);
+      const display = isND ? '' : v;
+      bodyRows += `<td><input type="text" inputmode="decimal" class="${isND?'':''}" placeholder="ND"
+        data-cell="${g.id}:${r}" value="${display}"></td>`;
+    }
+    bodyRows += `</tr>`;
+  }
+  // descriptive row
+  let descRow = `<tr class="desc-row"><td>n / mean</td>`;
+  for(const g of state.groups){
+    const vals = resolvedValuesForDescriptives(g);
+    descRow += `<td>${vals.length? 'n='+vals.length+', '+fmt(mean(vals)) : '—'}</td>`;
+  }
+  descRow += `</tr>`;
+
+  el.innerHTML = `
+    <div class="page-head">
+      <h1 class="page-title">Data</h1>
+      <p class="page-desc">Enter values directly, or paste a table below. Type <strong>ND</strong> or leave a cell blank for a non-detect / missing value.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Groups <span class="tag">${state.groups.length} group${state.groups.length===1?'':'s'}</span></h3>
+      <div class="datagrid-wrap">
+        <table class="datagrid">
+          <thead><tr>${theadCols}<th style="width:1%;"></th></tr></thead>
+          <tbody>${bodyRows}${descRow}</tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="btn-add-group">+ Add group</button>
+        <button class="btn" id="btn-add-row-all">+ Add row to all</button>
+        <div class="spacer"></div>
+        <label class="field" style="flex-direction:row;align-items:center;gap:6px;">
+          <input type="checkbox" id="nd-mode-toggle" ${state.ndMode==='lodhalf'?'checked':''}>
+          <span>Substitute non-detects with LOD ÷ 2</span>
+        </label>
+        <label class="field" style="flex-direction:row;align-items:center;gap:6px;">
+          LOD <input type="number" id="lod-input" value="${state.lod}" style="width:70px;" ${state.ndMode==='exclude'?'disabled':''}>
+        </label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Paste import</h3>
+      <p class="page-desc" style="margin-bottom:10px;">First row = group names, tab- or comma-separated. Use <strong>ND</strong> for non-detects.</p>
+      <textarea id="paste-area" rows="5" style="width:100%;font-family:var(--font-mono);" placeholder="FGF21 KO	B6
+ND	6008
+ND	2365
+1812	819.8
+..."></textarea>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn primary" id="btn-import">Replace data from paste</button>
+        <span class="page-desc" id="import-msg"></span>
+      </div>
+    </div>
+  `;
+
+  // wire events
+  el.querySelectorAll('[data-cell]').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const [gid, ridx] = e.target.dataset.cell.split(':');
+      const g = state.groups.find(g=>g.id===gid);
+      const raw = e.target.value.trim();
+      if(raw==='' || raw.toUpperCase()==='ND'){
+        g.values[+ridx] = null;
+      } else {
+        const num = parseFloat(raw);
+        g.values[+ridx] = Number.isNaN(num) ? null : num;
+      }
+      renderDataTab();
+    });
+  });
+  el.querySelectorAll('[data-rename]').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const g = state.groups.find(g=>g.id===e.target.dataset.rename);
+      g.name = e.target.value || g.name;
+    });
+  });
+  el.querySelectorAll('[data-addrow]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const g = state.groups.find(g=>g.id===e.target.dataset.addrow);
+      g.values.push(null);
+      renderDataTab();
+    });
+  });
+  el.querySelectorAll('[data-delgroup]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      if(state.groups.length<=1) return;
+      state.groups = state.groups.filter(g=>g.id!==e.target.dataset.delgroup);
+      renderDataTab();
+    });
+  });
+  el.querySelectorAll('[data-swatch]').forEach(sw=>{
+    sw.addEventListener('click', e=>{
+      const g = state.groups.find(g=>g.id===e.target.dataset.swatch);
+      const idx = PALETTE.indexOf(g.color);
+      g.color = PALETTE[(idx+1)%PALETTE.length];
+      renderDataTab();
+    });
+  });
+  el.querySelector('#btn-add-group').addEventListener('click', ()=>{
+    const color = PALETTE[state.groups.length % PALETTE.length];
+    state.groups.push(makeGroup('Group '+String.fromCharCode(65+state.groups.length), color, new Array(nRows()).fill(null)));
+    renderDataTab();
+  });
+  el.querySelector('#btn-add-row-all').addEventListener('click', ()=>{
+    state.groups.forEach(g=>g.values.push(null));
+    renderDataTab();
+  });
+  el.querySelector('#nd-mode-toggle').addEventListener('change', e=>{
+    state.ndMode = e.target.checked ? 'lodhalf' : 'exclude';
+    renderDataTab();
+  });
+  el.querySelector('#lod-input').addEventListener('change', e=>{
+    state.lod = parseFloat(e.target.value) || state.lod;
+    renderDataTab();
+  });
+  el.querySelector('#btn-import').addEventListener('click', ()=>{
+    const raw = el.querySelector('#paste-area').value;
+    const msg = el.querySelector('#import-msg');
+    try{
+      const parsed = parsePastedTable(raw);
+      state.groups = parsed;
+      msg.textContent = `Imported ${parsed.length} groups.`;
+      msg.style.color = 'var(--success)';
+      renderDataTab();
+    }catch(err){
+      msg.textContent = 'Could not parse that — check the format.';
+      msg.style.color = 'var(--danger)';
+    }
+  });
+}
+function resolvedValuesForDescriptives(g){
+  // for the quick preview row: always exclude ND regardless of global mode (just a peek)
+  return g.values.filter(v=>v!==null&&v!==undefined&&!Number.isNaN(v));
+}
+function parsePastedTable(raw){
+  const lines = raw.split('\n').map(l=>l.trim()).filter(l=>l.length);
+  if(lines.length<2) throw new Error('need header + at least one row');
+  const sep = lines[0].includes('\t') ? '\t' : ',';
+  const headers = lines[0].split(sep).map(s=>s.trim());
+  const cols = headers.map((h,i)=>makeGroup(h||('Group '+(i+1)), PALETTE[i%PALETTE.length], []));
+  for(let li=1; li<lines.length; li++){
+    const cells = lines[li].split(sep);
+    cols.forEach((g,ci)=>{
+      const raw = (cells[ci]||'').trim();
+      if(raw==='' || raw.toUpperCase()==='ND') g.values.push(null);
+      else { const n=parseFloat(raw); g.values.push(Number.isNaN(n)?null:n); }
+    });
+  }
+  return cols;
+}
+function escapeAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+function fmt(x, d=3){
+  if(x===null||x===undefined||Number.isNaN(x)) return '—';
+  if(Math.abs(x)>=1000) return x.toLocaleString(undefined,{maximumFractionDigits:1});
+  return Number(x.toPrecision(d)).toString();
+}
+function fmtP(p){
+  if(p===null||p===undefined||Number.isNaN(p)) return '—';
+  if(p<0.0001) return '<0.0001';
+  return p.toFixed(4);
+}
+function sigStars(p){
+  if(p<0.0001) return '****';
+  if(p<0.001) return '***';
+  if(p<0.01) return '**';
+  if(p<0.05) return '*';
+  return 'ns';
+}
+
+/* =========================================================================
+   ANALYZE TAB
+   ========================================================================= */
+function getGroupById(id){ return state.groups.find(g=>g.id===id); }
+function selectedGroups(){
+  return state.analysis.selectedIds.map(getGroupById).filter(Boolean);
+}
+function ensureSelection(){
+  // default: select all groups on first visit
+  if(state.analysis.selectedIds.length===0){
+    state.analysis.selectedIds = state.groups.map(g=>g.id);
+  } else {
+    // drop ids that no longer exist
+    state.analysis.selectedIds = state.analysis.selectedIds.filter(id=>getGroupById(id));
+  }
+}
+function inferModeFromSelection(){
+  const n = state.analysis.selectedIds.length;
+  if(n<=2) return 'two';
+  return 'multi';
+}
+
+function assumptionChecks(groupsArr){
+  const results = groupsArr.map(g=>{
+    const vals = resolvedValues(g);
+    if(vals.length<8) return {name:g.name, n:vals.length, p:null, verdict:'toolow'};
+    const r = dagostinoK2(vals);
+    return {name:g.name, n:vals.length, p:r.p, verdict: r.p<0.05 ? 'nonnormal' : 'normal'};
+  });
+  let variance = null;
+  const allVals = groupsArr.map(g=>resolvedValues(g)).filter(v=>v.length>=2);
+  if(allVals.length===groupsArr.length && groupsArr.length>=2){
+    const bf = brownForsythe(allVals);
+    variance = {p:bf.p, F:bf.F, verdict: bf.p<0.05 ? 'unequal':'equal'};
+  }
+  return {normality:results, variance};
+}
+
+const TEST_DEFS = {
+  two: [
+    {key:'welch', label:"Welch's t-test (unpaired)", needsPaired:false},
+    {key:'student', label:"Student's t-test (unpaired, equal variance)", needsPaired:false},
+    {key:'mwu', label:"Mann-Whitney U (non-parametric)", needsPaired:false},
+    {key:'pairedt', label:"Paired t-test", needsPaired:true},
+    {key:'wilcoxon', label:"Wilcoxon signed-rank (non-parametric, paired)", needsPaired:true},
+  ],
+  multi: [
+    {key:'anova', label:"One-way ANOVA + pairwise t-tests (Bonferroni)"},
+    {key:'kw', label:"Kruskal-Wallis + pairwise Mann-Whitney (Bonferroni)"},
+  ],
+  corr: [
+    {key:'pearson', label:"Pearson correlation"},
+    {key:'spearman', label:"Spearman correlation"},
+    {key:'linreg', label:"Simple linear regression"},
+  ],
+};
+
+function renderAnalyzeTab(){
+  ensureSelection();
+  const mode = state.analysis.mode;
+  const el = document.getElementById('tab-analyze');
+  const groupChecks = state.groups.map(g=>`
+    <label class="checkline">
+      <input type="checkbox" data-selgroup="${g.id}" ${state.analysis.selectedIds.includes(g.id)?'checked':''}>
+      <span class="swatch" style="background:${g.color}"></span>
+      ${escapeHtml(g.name)} <span style="color:var(--ink-soft)">(${g.values.length} rows, ${resolvedValuesForDescriptives(g).length} detected)</span>
+    </label>`).join('');
+
+  const testOptions = TEST_DEFS[mode].filter(t=>{
+    if(mode!=='two') return true;
+    return t.needsPaired === state.analysis.paired;
+  }).map(t=>`<option value="${t.key}" ${state.analysis.testKey===t.key?'selected':''}>${t.label}</option>`).join('');
+
+  el.innerHTML = `
+    <div class="page-head">
+      <h1 class="page-title">Analyze</h1>
+      <p class="page-desc">Pick which groups to compare, check assumptions, then run a test. Results here also drive the significance bracket on the Plot tab.</p>
+    </div>
+
+    <div class="panel">
+      <h3>1. Groups to compare</h3>
+      <div class="row" style="gap:22px;align-items:flex-start;">
+        <div>${groupChecks}</div>
+        <div class="spacer"></div>
+        <div class="row" style="gap:14px;">
+          <label class="field">Comparison type
+            <select id="mode-select">
+              <option value="two" ${mode==='two'?'selected':''}>Two groups (t-test / Mann-Whitney)</option>
+              <option value="multi" ${mode==='multi'?'selected':''}>Three+ groups (ANOVA / Kruskal-Wallis)</option>
+              <option value="corr" ${mode==='corr'?'selected':''}>Correlation / regression (two numeric columns)</option>
+            </select>
+          </label>
+          ${mode==='two' || mode==='corr' ? `
+          <label class="field" style="flex-direction:row;align-items:center;gap:6px;margin-top:18px;">
+            <input type="checkbox" id="paired-toggle" ${state.analysis.paired?'checked':''}>
+            <span>${mode==='corr'?'(rows are paired by index)':'Paired / matched samples'}</span>
+          </label>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>2. Check assumptions <span class="tag">optional but recommended</span></h3>
+      <div class="row">
+        <button class="btn" id="btn-check-assumptions">Check normality &amp; variance</button>
+        <button class="btn ghost" id="btn-suggest-test">Suggest a test based on this data</button>
+      </div>
+      <div id="assumptions-out" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="panel">
+      <h3>3. Run a test</h3>
+      <div class="row">
+        <label class="field">Test
+          <select id="test-select">${testOptions}</select>
+        </label>
+        <button class="btn primary" id="btn-run-test" style="margin-top:18px;">Run analysis</button>
+      </div>
+      <div id="analysis-out" style="margin-top:16px;"></div>
+    </div>
+  `;
+
+  el.querySelectorAll('[data-selgroup]').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      const id = e.target.dataset.selgroup;
+      if(e.target.checked){ if(!state.analysis.selectedIds.includes(id)) state.analysis.selectedIds.push(id); }
+      else { state.analysis.selectedIds = state.analysis.selectedIds.filter(x=>x!==id); }
+      if(state.analysis.mode!=='corr') state.analysis.mode = inferModeFromSelection()==='two' && state.analysis.selectedIds.length>2 ? 'multi' : state.analysis.mode;
+      renderAnalyzeTab();
+    });
+  });
+  el.querySelector('#mode-select').addEventListener('change', e=>{
+    state.analysis.mode = e.target.value;
+    state.analysis.testKey = null;
+    renderAnalyzeTab();
+  });
+  const pairedToggle = el.querySelector('#paired-toggle');
+  if(pairedToggle) pairedToggle.addEventListener('change', e=>{
+    state.analysis.paired = e.target.checked;
+    state.analysis.testKey = null;
+    renderAnalyzeTab();
+  });
+  el.querySelector('#btn-check-assumptions').addEventListener('click', ()=>renderAssumptions());
+  el.querySelector('#btn-suggest-test').addEventListener('click', ()=>suggestTest());
+  el.querySelector('#test-select').addEventListener('change', e=>{ state.analysis.testKey = e.target.value; });
+  el.querySelector('#btn-run-test').addEventListener('click', ()=>runAnalysis());
+}
+
+function renderAssumptions(){
+  const groupsArr = selectedGroups();
+  const out = document.getElementById('assumptions-out');
+  if(groupsArr.length<2){ out.innerHTML = `<div class="callout warn">Select at least two groups.</div>`; return; }
+  const checks = assumptionChecks(groupsArr);
+  let rows = checks.normality.map(r=>{
+    let chip;
+    if(r.verdict==='toolow') chip = `<span class="chip info">n=${r.n}, too few to test</span>`;
+    else if(r.verdict==='normal') chip = `<span class="chip ok">looks normal (p=${fmtP(r.p)})</span>`;
+    else chip = `<span class="chip warn">not normal (p=${fmtP(r.p)})</span>`;
+    return `<tr><td>${escapeHtml(r.name)}</td><td>${chip}</td></tr>`;
+  }).join('');
+  let varRow = '';
+  if(checks.variance){
+    const chip = checks.variance.verdict==='equal'
+      ? `<span class="chip ok">roughly equal (p=${fmtP(checks.variance.p)})</span>`
+      : `<span class="chip warn">unequal (p=${fmtP(checks.variance.p)})</span>`;
+    varRow = `<tr><td>Variance across groups (Brown–Forsythe)</td><td>${chip}</td></tr>`;
+  }
+  out.innerHTML = `
+    <table class="stat-table">
+      <thead><tr><th>Check</th><th>Result</th></tr></thead>
+      <tbody>${rows}${varRow}</tbody>
+    </table>
+    <p class="page-desc" style="margin-top:10px;">Normality uses D'Agostino–Pearson (needs n≥8 per group to be meaningful). These are guides, not hard gates — with small n, non-parametric tests are often the safer default regardless.</p>
+  `;
+}
+
+function suggestTest(){
+  const groupsArr = selectedGroups();
+  const out = document.getElementById('assumptions-out');
+  if(groupsArr.length<2){ out.innerHTML = `<div class="callout warn">Select at least two groups first.</div>`; return; }
+  const checks = assumptionChecks(groupsArr);
+  const anyNonNormal = checks.normality.some(r=>r.verdict==='nonnormal');
+  const anyTooLow = checks.normality.some(r=>r.verdict==='toolow');
+  const unequalVar = checks.variance && checks.variance.verdict==='unequal';
+  let rec, reason;
+  const mode = state.analysis.mode;
+  if(mode==='two'){
+    if(state.analysis.paired){
+      if(anyNonNormal){ rec='wilcoxon'; reason="at least one group deviates from normal, so the paired non-parametric test is the safer choice."; }
+      else { rec='pairedt'; reason="both sides look reasonably normal, so the paired t-test is appropriate."; }
+    } else {
+      if(anyNonNormal || anyTooLow){ rec='mwu'; reason= anyTooLow ? "sample sizes are too small to check normality reliably, so Mann-Whitney is the safer default." : "at least one group deviates from a normal distribution, so Mann-Whitney U is more robust than a t-test here."; }
+      else if(unequalVar){ rec='welch'; reason="both groups look roughly normal, but variances differ — Welch's t-test doesn't assume equal variance."; }
+      else { rec='student'; reason="both groups look normal with similar variance — a standard Student's t-test fits well."; }
+    }
+  } else if(mode==='multi'){
+    if(anyNonNormal || anyTooLow){ rec='kw'; reason="one or more groups deviate from normal (or n is too small to tell), so Kruskal-Wallis is the safer choice over ANOVA."; }
+    else { rec='anova'; reason="groups look roughly normal — one-way ANOVA is appropriate."; }
+  } else {
+    rec='pearson'; reason="Pearson is the default for two continuous, roughly linear variables — switch to Spearman if the relationship looks non-linear or monotonic-only.";
+  }
+  state.analysis.testKey = rec;
+  const sel = document.getElementById('test-select');
+  if(sel) sel.value = rec;
+  renderAssumptions();
+  const out2 = document.getElementById('assumptions-out');
+  out2.innerHTML += `<div class="callout note" style="margin-top:10px;"><strong>Suggested: ${TEST_DEFS[mode].find(t=>t.key===rec).label}.</strong> ${reason}</div>`;
+}
+
+function runAnalysis(){
+  const groupsArr = selectedGroups();
+  const out = document.getElementById('analysis-out');
+  const mode = state.analysis.mode;
+  const testKey = state.analysis.testKey || document.getElementById('test-select').value;
+  state.analysis.testKey = testKey;
+
+  if(mode!=='corr' && groupsArr.length<2){ out.innerHTML=`<div class="callout warn">Select at least two groups.</div>`; return; }
+
+  // descriptive stats table (always shown)
+  const descHTML = `
+    <table class="stat-table" style="margin-bottom:14px;">
+      <thead><tr><th>Group</th><th>n</th><th>Mean</th><th>SD</th><th>SEM</th><th>Median</th></tr></thead>
+      <tbody>
+        ${groupsArr.map(g=>{
+          const v = resolvedValues(g);
+          if(v.length===0) return `<tr><td class="swatch-cell"><span class="swatch" style="background:${g.color}"></span>${escapeHtml(g.name)}</td><td colspan="5">no data</td></tr>`;
+          return `<tr><td class="swatch-cell"><span class="swatch" style="background:${g.color}"></span>${escapeHtml(g.name)}</td>
+            <td>${v.length}</td><td>${fmt(mean(v))}</td><td>${v.length>1?fmt(sd(v)):'—'}</td><td>${v.length>1?fmt(sem(v)):'—'}</td><td>${fmt(median(v))}</td></tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+
+  let resultHTML = '';
+  try{
+    if(mode==='two'){
+      const [ga,gb] = groupsArr;
+      const a = resolvedValues(ga), b = resolvedValues(gb);
+      if(a.length<2||b.length<2) throw new Error('Each group needs at least 2 values.');
+      if((testKey==='pairedt'||testKey==='wilcoxon') && a.length!==b.length) throw new Error('Paired tests need equal sample sizes in both groups.');
+      let r;
+      if(testKey==='welch') r = {...ttestInd(a,b,false), label:"Welch's t-test", statLabel:'t', df:null};
+      else if(testKey==='student') r = {...ttestInd(a,b,true), label:"Student's t-test"};
+      else if(testKey==='pairedt') r = {...ttestPaired(a,b), label:"Paired t-test"};
+      else if(testKey==='mwu') r = {...mannWhitneyU(a,b), label:"Mann-Whitney U", statLabel:'U'};
+      else if(testKey==='wilcoxon') r = {...wilcoxonSignedRank(a,b), label:"Wilcoxon signed-rank", statLabel:'W'};
+      const statKey = r.t!==undefined ? 't' : (r.U!==undefined?'U':'W');
+      const statVal = r.t!==undefined ? r.t : (r.U!==undefined?r.U:r.W);
+      resultHTML = resultCardHTML(r.label, r.p, [
+        {k:statKey.toUpperCase(), v:fmt(statVal)},
+        r.df!==undefined && r.df!==null ? {k:'df', v:fmt(r.df,4)} : null,
+        r.cohensD!==undefined ? {k:"Cohen's d", v:fmt(r.cohensD)} : null,
+        {k:'n', v:`${a.length} vs ${b.length}`},
+      ].filter(Boolean));
+      state.analysis.lastResult = {p:r.p, testLabel:r.label, groupIds:[ga.id,gb.id]};
+    } else if(mode==='multi'){
+      const vals = groupsArr.map(g=>resolvedValues(g));
+      if(vals.some(v=>v.length<2)) throw new Error('Each group needs at least 2 values.');
+      if(testKey==='anova'){
+        const r = oneWayANOVA(vals);
+        const pw = pairwiseTTestsBonferroni(Object.fromEntries(groupsArr.map((g,i)=>[g.name, vals[i]])));
+        resultHTML = resultCardHTML('One-way ANOVA', r.p, [
+          {k:'F', v:fmt(r.F)}, {k:'df', v:`${r.dfB}, ${r.dfW}`}, {k:'η²', v:fmt(r.etaSq)},
+        ]) + pairwiseTableHTML(pw);
+        state.analysis.lastResult = {p:r.p, testLabel:'One-way ANOVA', groupIds:groupsArr.map(g=>g.id)};
+      } else {
+        const r = kruskalWallis(vals);
+        const pw = pairwiseTTestsBonferroni(Object.fromEntries(groupsArr.map((g,i)=>[g.name, vals[i]])));
+        // recompute pairwise using Mann-Whitney instead for consistency with KW
+        const pwMWU = [];
+        const names = groupsArr.map(g=>g.name);
+        const m = names.length*(names.length-1)/2;
+        for(let i=0;i<groupsArr.length;i++) for(let j=i+1;j<groupsArr.length;j++){
+          const mw = mannWhitneyU(vals[i], vals[j]);
+          pwMWU.push({a:names[i], b:names[j], t:mw.z, df:null, p:mw.p, pAdj:Math.min(mw.p*m,1), statLabel:'z'});
+        }
+        resultHTML = resultCardHTML('Kruskal-Wallis', r.p, [
+          {k:'H', v:fmt(r.H)}, {k:'df', v:fmt(r.df)},
+        ]) + pairwiseTableHTML(pwMWU);
+        state.analysis.lastResult = {p:r.p, testLabel:'Kruskal-Wallis', groupIds:groupsArr.map(g=>g.id)};
+      }
+    } else { // corr
+      if(groupsArr.length<2) throw new Error('Pick two numeric columns.');
+      const [ga,gb] = groupsArr;
+      const n = Math.min(ga.values.length, gb.values.length);
+      const xs=[], ys=[];
+      for(let i=0;i<n;i++){
+        if(ga.values[i]==null||gb.values[i]==null) continue;
+        xs.push(ga.values[i]); ys.push(gb.values[i]);
+      }
+      if(xs.length<3) throw new Error('Need at least 3 complete paired rows (no ND on either side).');
+      if(testKey==='pearson'){
+        const r = pearson(xs,ys);
+        resultHTML = resultCardHTML('Pearson correlation', r.p, [{k:'r',v:fmt(r.r)},{k:'df',v:r.df},{k:'r²',v:fmt(r.r*r.r)}]);
+        state.analysis.lastResult = {p:r.p, testLabel:'Pearson correlation', groupIds:[ga.id,gb.id]};
+      } else if(testKey==='spearman'){
+        const r = spearman(xs,ys);
+        resultHTML = resultCardHTML('Spearman correlation', r.p, [{k:'ρ',v:fmt(r.r)},{k:'df',v:r.df}]);
+        state.analysis.lastResult = {p:r.p, testLabel:'Spearman correlation', groupIds:[ga.id,gb.id]};
+      } else {
+        const r = linearRegression(xs,ys);
+        resultHTML = resultCardHTML('Linear regression (slope ≠ 0)', r.p, [
+          {k:'slope',v:fmt(r.slope)},{k:'intercept',v:fmt(r.intercept)},{k:'R²',v:fmt(r.r2)},{k:'df',v:r.df},
+        ]);
+        state.analysis.lastResult = {p:r.p, testLabel:'Linear regression', groupIds:[ga.id,gb.id]};
+      }
+    }
+  }catch(err){
+    out.innerHTML = descHTML + `<div class="callout warn">${err.message}</div>`;
+    return;
+  }
+  out.innerHTML = descHTML + resultHTML;
+}
+
+function resultCardHTML(label, p, extras){
+  const sig = p<0.05;
+  return `
+    <div class="result-card">
+      <div class="headline">
+        <span class="test-name">${label}</span>
+        <span class="verdict ${sig?'sig':'ns'}">${sigStars(p)}</span>
+      </div>
+      <div class="p-big">p = ${fmtP(p)}</div>
+      <div class="result-grid">
+        ${extras.map(x=>`<div><span class="k">${x.k}</span>${x.v}</div>`).join('')}
+      </div>
+    </div>`;
+}
+function pairwiseTableHTML(pw){
+  return `
+    <h3 style="margin-top:18px;">Pairwise comparisons <span class="tag">Bonferroni-adjusted</span></h3>
+    <table class="stat-table">
+      <thead><tr><th>Comparison</th><th>${pw[0]&&pw[0].statLabel==='z'?'z':'t'}</th><th>p (raw)</th><th>p (adjusted)</th></tr></thead>
+      <tbody>
+        ${pw.map(r=>`<tr><td>${escapeHtml(r.a)} vs ${escapeHtml(r.b)}</td><td>${fmt(r.t)}</td><td>${fmtP(r.p)}</td>
+          <td><strong>${fmtP(r.pAdj)}</strong> ${r.pAdj<0.05?'<span class="chip ok">sig</span>':'<span class="chip">ns</span>'}</td></tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* =========================================================================
+   PLOT TAB
+   ========================================================================= */
+function seededRand(seed){
+  // mulberry32
+  let t = seed + 0x6D2B79F5;
+  return function(){
+    t |= 0; t = (t + 0x6D2B79F5) | 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hexToRgb(hex){
+  const m = hex.replace('#','');
+  return [parseInt(m.substr(0,2),16), parseInt(m.substr(2,2),16), parseInt(m.substr(4,2),16)];
+}
+function darken(hex, amt){
+  const [r,g,b] = hexToRgb(hex);
+  const f = c => Math.max(0, Math.round(c*(1-amt)));
+  return `rgb(${f(r)},${f(g)},${f(b)})`;
+}
+
+function groupsForPlot(){
+  // prefer the groups currently selected on the Analyze tab; fall back to all
+  const sel = state.analysis.selectedIds.map(getGroupById).filter(Boolean);
+  return sel.length>=1 ? sel : state.groups;
+}
+function valuesWithFlags(g){
+  const out=[];
+  for(const v of g.values){
+    const isND = (v===null||v===undefined||Number.isNaN(v));
+    if(isND){
+      if(state.ndMode==='lodhalf') out.push({value: state.lod/2, isND:true});
+      // excluded otherwise
+    } else out.push({value:v, isND:false});
+  }
+  return out;
+}
+function quantile(sorted, q){
+  const pos = (sorted.length-1)*q;
+  const base = Math.floor(pos), rest = pos-base;
+  if(sorted[base+1]!==undefined) return sorted[base]+rest*(sorted[base+1]-sorted[base]);
+  return sorted[base];
+}
+
+function buildChartSVG(){
+  const groupsArr = groupsForPlot();
+  const W=560, H=560;
+  const marginL=64, marginR=24, marginT=86, marginB=90;
+  const plotW = W-marginL-marginR, plotH = H-marginT-marginB;
+
+  const groupData = groupsArr.map(g=>{
+    const pts = valuesWithFlags(g);
+    const vals = pts.map(p=>p.value);
+    return {
+      g, pts, vals,
+      n: vals.length,
+      mean: vals.length? mean(vals): null,
+      sd: vals.length>1? sd(vals): null,
+      sem: vals.length>1? sem(vals): null,
+      median: vals.length? median(vals): null,
+      sorted: [...vals].sort((a,b)=>a-b),
+    };
+  });
+
+  let yMax = 0, yMin = 0;
+  groupData.forEach(gd=>{
+    gd.vals.forEach(v=>{ if(v>yMax) yMax=v; });
+    if(gd.mean!==null && gd.sem!==null){
+      const errAmt = state.plot.errorType==='sd'? gd.sd : (state.plot.errorType==='ci95'? gd.sem*1.96 : gd.sem);
+      if(gd.mean+errAmt>yMax) yMax = gd.mean+errAmt;
+    }
+  });
+  if(yMax<=0) yMax = 1;
+  const log = state.plot.log;
+  const positiveVals = groupData.flatMap(gd=>gd.vals.filter(v=>v>0));
+  const yFloor = log ? (positiveVals.length? Math.min(...positiveVals) : 1) : 0;
+  function yScale(v){
+    if(log){
+      const lo = Math.log10(Math.max(yFloor,1e-9)), hi = Math.log10(yMax*1.15);
+      const vv = Math.log10(Math.max(v,1e-9));
+      return marginT + plotH*(1-(vv-lo)/(hi-lo));
+    }
+    return marginT + plotH*(1-v/(yMax*1.15));
+  }
+
+  const n = groupData.length;
+  const colW = plotW/n;
+  const barW = Math.min(colW*0.5, 90);
+
+  let svg = '';
+  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#FFFFFF"/>`;
+
+  // axes
+  svg += `<line x1="${marginL}" y1="${marginT}" x2="${marginL}" y2="${H-marginB}" stroke="#1E2530" stroke-width="1.6"/>`;
+  svg += `<line x1="${marginL}" y1="${H-marginB}" x2="${W-marginR}" y2="${H-marginB}" stroke="#1E2530" stroke-width="1.6"/>`;
+
+  // y ticks
+  const tickCount = 5;
+  for(let i=0;i<=tickCount;i++){
+    let val, y;
+    if(log){
+      const lo=Math.log10(Math.max(yFloor,1e-9)), hi=Math.log10(yMax*1.15);
+      const vv = lo + (hi-lo)*i/tickCount;
+      val = Math.pow(10,vv); y = yScale(val);
+    } else {
+      val = (yMax*1.15) * i/tickCount; y = yScale(val);
+    }
+    svg += `<line x1="${marginL-5}" y1="${y}" x2="${marginL}" y2="${y}" stroke="#1E2530" stroke-width="1.2"/>`;
+    svg += `<text x="${marginL-10}" y="${y+4}" text-anchor="end" font-size="12" font-family="IBM Plex Mono, monospace" fill="#1E2530">${fmtAxisNum(val)}</text>`;
+  }
+  svg += `<text x="${18}" y="${marginT+plotH/2}" text-anchor="middle" font-size="12.5" font-family="IBM Plex Sans, sans-serif" fill="#1E2530" transform="rotate(-90 18 ${marginT+plotH/2})">${escapeXML(state.plot.yLabel)}</text>`;
+
+  // title
+  svg += `<text x="${W/2}" y="40" text-anchor="middle" font-size="22" font-weight="700" font-family="IBM Plex Sans, sans-serif" fill="#1E2530">${escapeXML(state.plot.title)}</text>`;
+
+  // bars / boxes + points
+  let ndLabelShown = false;
+  const centers = [];
+  groupData.forEach((gd, i)=>{
+    const cx = marginL + colW*i + colW/2;
+    centers.push(cx);
+    const color = gd.g.color;
+    const rng = seededRand(1000 + i*97);
+
+    if(state.plot.chartType==='bar'){
+      if(gd.mean!==null){
+        const y0 = yScale(0), y1 = yScale(gd.mean);
+        svg += `<rect x="${cx-barW/2}" y="${Math.min(y0,y1)}" width="${barW}" height="${Math.abs(y0-y1)}" fill="${color}" fill-opacity="0.32" stroke="${darken(color,0.35)}" stroke-width="2"/>`;
+        if(gd.sem!==null){
+          const errAmt = state.plot.errorType==='sd'? gd.sd : (state.plot.errorType==='ci95'? gd.sem*1.96 : gd.sem);
+          const yTop = yScale(gd.mean+errAmt);
+          svg += `<line x1="${cx}" y1="${y1}" x2="${cx}" y2="${yTop}" stroke="#1E2530" stroke-width="1.6"/>`;
+          svg += `<line x1="${cx-10}" y1="${yTop}" x2="${cx+10}" y2="${yTop}" stroke="#1E2530" stroke-width="1.6"/>`;
+        }
+      }
+    } else { // box
+      if(gd.sorted.length>=2){
+        const q1=quantile(gd.sorted,0.25), q3=quantile(gd.sorted,0.75), med=gd.median;
+        const yQ1=yScale(q1), yQ3=yScale(q3), yMed=yScale(med);
+        svg += `<rect x="${cx-barW/2}" y="${Math.min(yQ1,yQ3)}" width="${barW}" height="${Math.abs(yQ1-yQ3)}" fill="${color}" fill-opacity="0.28" stroke="${darken(color,0.35)}" stroke-width="2"/>`;
+        svg += `<line x1="${cx-barW/2}" y1="${yMed}" x2="${cx+barW/2}" y2="${yMed}" stroke="${darken(color,0.35)}" stroke-width="2.4"/>`;
+        const yMinV = yScale(gd.sorted[0]), yMaxV = yScale(gd.sorted[gd.sorted.length-1]);
+        svg += `<line x1="${cx}" y1="${yQ3}" x2="${cx}" y2="${yMaxV}" stroke="#1E2530" stroke-width="1.3"/>`;
+        svg += `<line x1="${cx}" y1="${yQ1}" x2="${cx}" y2="${yMinV}" stroke="#1E2530" stroke-width="1.3"/>`;
+      }
+    }
+
+    if(state.plot.showPoints){
+      gd.pts.forEach((p,pi)=>{
+        const jitter = (rng()-0.5)*barW*0.55;
+        const px = cx+jitter, py = yScale(p.value);
+        if(p.isND){
+          svg += `<circle cx="${px}" cy="${py}" r="6.2" fill="#FFFFFF" stroke="${color}" stroke-width="1.8"/>`;
+        } else {
+          svg += `<circle cx="${px}" cy="${py}" r="6.2" fill="${color}" stroke="#FFFFFF" stroke-width="1.3"/>`;
+        }
+      });
+    }
+
+    // x label
+    svg += `<text x="${cx}" y="${H-marginB+18}" text-anchor="end" font-size="13" font-family="IBM Plex Sans, sans-serif" fill="#1E2530" transform="rotate(-28 ${cx} ${H-marginB+18})">${escapeXML(gd.g.name)}</text>`;
+  });
+
+  // legend for non-detects (if any)
+  const anyND = groupData.some(gd=>gd.pts.some(p=>p.isND));
+  if(anyND && state.plot.showPoints){
+    svg += `<circle cx="${marginL+10}" cy="${marginT-38}" r="6" fill="#FFFFFF" stroke="#1E2530" stroke-width="1.8"/>`;
+    svg += `<text x="${marginL+22}" y="${marginT-34}" font-size="11.5" font-family="IBM Plex Sans, sans-serif" fill="#1E2530">Below detection limit</text>`;
+  }
+
+  // significance bracket
+  if(state.plot.showSig && state.analysis.lastResult){
+    const lr = state.analysis.lastResult;
+    const idxA = groupsArr.findIndex(g=>g.id===lr.groupIds[0]);
+    const idxB = groupsArr.findIndex(g=>g.id===lr.groupIds[1]);
+    if(idxA>=0 && idxB>=0 && idxA!==idxB){
+      const x1=centers[idxA], x2=centers[idxB];
+      const yBracket = marginT + 26;
+      svg += `<path d="M${x1} ${yBracket+14} L${x1} ${yBracket} L${x2} ${yBracket} L${x2} ${yBracket+14}" fill="none" stroke="#1E2530" stroke-width="1.6"/>`;
+      svg += `<text x="${(x1+x2)/2}" y="${yBracket-6}" text-anchor="middle" font-size="15" font-weight="700" font-family="IBM Plex Sans, sans-serif" fill="#1E2530">${sigStars(lr.p)}</text>`;
+      svg += `<text x="${(x1+x2)/2}" y="${yBracket-20}" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="#4A5568">p=${fmtP(lr.p)}</text>`;
+    }
+  }
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">${svg}</svg>`;
+}
+function fmtAxisNum(v){
+  if(Math.abs(v)>=1000) return (v/1000).toFixed(v%1000===0?0:1)+'k';
+  return fmt(v,3);
+}
+function escapeXML(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderPlotTab(){
+  const el = document.getElementById('tab-plot');
+  const groupsArr = groupsForPlot();
+  const colorRows = groupsArr.map(g=>`
+    <label class="checkline" style="gap:8px;">
+      <span class="swatch" style="background:${g.color}" data-plot-swatch="${g.id}"></span>${escapeHtml(g.name)}
+    </label>`).join('');
+
+  el.innerHTML = `
+    <div class="page-head">
+      <h1 class="page-title">Plot</h1>
+      <p class="page-desc">Renders live from whatever's selected on the Analyze tab (or all groups, if none are selected). Nothing is saved until you download it.</p>
+    </div>
+    <div class="row" style="align-items:flex-start;gap:20px;">
+      <div class="panel" style="flex:0 0 260px;">
+        <h3>Chart</h3>
+        <label class="field">Type
+          <select id="plot-type">
+            <option value="bar" ${state.plot.chartType==='bar'?'selected':''}>Bar + points</option>
+            <option value="box" ${state.plot.chartType==='box'?'selected':''}>Box + points</option>
+          </select>
+        </label>
+        <label class="field" style="margin-top:10px;">Error bars
+          <select id="plot-error" ${state.plot.chartType==='box'?'disabled':''}>
+            <option value="sem" ${state.plot.errorType==='sem'?'selected':''}>SEM</option>
+            <option value="sd" ${state.plot.errorType==='sd'?'selected':''}>SD</option>
+            <option value="ci95" ${state.plot.errorType==='ci95'?'selected':''}>95% CI (approx.)</option>
+          </select>
+        </label>
+        <label class="checkline" style="margin-top:10px;"><input type="checkbox" id="plot-points" ${state.plot.showPoints?'checked':''}> Show individual points</label>
+        <label class="checkline"><input type="checkbox" id="plot-sig" ${state.plot.showSig?'checked':''}> Show significance bracket</label>
+        <label class="checkline"><input type="checkbox" id="plot-log" ${state.plot.log?'checked':''}> Log y-axis</label>
+
+        <h3 style="margin-top:18px;">Labels</h3>
+        <label class="field">Title
+          <input type="text" id="plot-title" value="${escapeAttr(state.plot.title)}">
+        </label>
+        <label class="field" style="margin-top:8px;">Y-axis label
+          <input type="text" id="plot-ylabel" value="${escapeAttr(state.plot.yLabel)}">
+        </label>
+
+        <h3 style="margin-top:18px;">Colors</h3>
+        ${colorRows}
+
+        <div class="row" style="margin-top:18px;">
+          <button class="btn primary" id="btn-download-png">Download PNG</button>
+        </div>
+        <div class="row">
+          <button class="btn" id="btn-download-svg">Download SVG</button>
+        </div>
+        <div id="download-msg" class="page-desc" style="margin-top:6px;"></div>
+      </div>
+      <div class="panel" style="flex:1;min-height:560px;">
+        <div id="chart-holder" style="width:100%;max-width:640px;margin:0 auto;"></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('chart-holder').innerHTML = buildChartSVG();
+
+  el.querySelector('#plot-type').addEventListener('change', e=>{ state.plot.chartType=e.target.value; renderPlotTab(); });
+  el.querySelector('#plot-error').addEventListener('change', e=>{ state.plot.errorType=e.target.value; document.getElementById('chart-holder').innerHTML=buildChartSVG(); });
+  el.querySelector('#plot-points').addEventListener('change', e=>{ state.plot.showPoints=e.target.checked; document.getElementById('chart-holder').innerHTML=buildChartSVG(); });
+  el.querySelector('#plot-sig').addEventListener('change', e=>{ state.plot.showSig=e.target.checked; document.getElementById('chart-holder').innerHTML=buildChartSVG(); });
+  el.querySelector('#plot-log').addEventListener('change', e=>{ state.plot.log=e.target.checked; document.getElementById('chart-holder').innerHTML=buildChartSVG(); });
+  el.querySelector('#plot-title').addEventListener('input', e=>{ state.plot.title=e.target.value; document.getElementById('chart-holder').innerHTML=buildChartSVG(); });
+  el.querySelector('#plot-ylabel').addEventListener('input', e=>{ state.plot.yLabel=e.target.value; document.getElementById('chart-holder').innerHTML=buildChartSVG(); });
+  el.querySelectorAll('[data-plot-swatch]').forEach(sw=>{
+    sw.addEventListener('click', e=>{
+      const g = getGroupById(e.target.dataset.plotSwatch);
+      const idx = PALETTE.indexOf(g.color);
+      g.color = PALETTE[(idx+1)%PALETTE.length];
+      renderPlotTab();
+    });
+  });
+  el.querySelector('#btn-download-png').addEventListener('click', ()=>downloadChart('png'));
+  el.querySelector('#btn-download-svg').addEventListener('click', ()=>downloadChart('svg'));
+}
+
+async function downloadChart(fmtType){
+  const msg = document.getElementById('download-msg');
+  const svgString = buildChartSVG();
+  const filename = (state.plot.title || 'plot').replace(/[^a-z0-9\-_]+/gi,'_').toLowerCase();
+  msg.textContent = 'Preparing…';
+  try{
+    const downloads = await claude.use('downloads');
+    if(!downloads){ msg.textContent = 'Downloads are not available in this view.'; return; }
+    if(fmtType==='svg'){
+      const blob = new Blob([svgString], {type:'image/svg+xml'});
+      const res = await downloads.save({filename: filename+'.svg', data: blob});
+      msg.textContent = res.status==='saved' ? 'Saved.' : 'Sent.';
+    } else {
+      const blob = await svgToPngBlob(svgString, 1120, 1120);
+      const res = await downloads.save({filename: filename+'.png', data: blob});
+      msg.textContent = res.status==='saved' ? 'Saved.' : 'Sent.';
+    }
+  }catch(err){
+    if(err && err.code==='declined') msg.textContent = 'Not saved.';
+    else if(err && err.code) msg.textContent = 'Could not save (' + err.code + ').';
+    else msg.textContent = 'Could not save.';
+  }
+}
+function svgToPngBlob(svgString, w, h){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    const svgBlob = new Blob([svgString], {type:'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(svgBlob);
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob=> blob? resolve(blob) : reject(new Error('toBlob failed')), 'image/png');
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+/* =========================================================================
+   GUIDE TAB — interactive decision tree
+   ========================================================================= */
+const GUIDE_TREE = {
+  start: {
+    q: "What are you comparing?",
+    options: [
+      {label:"Two groups", next:'two_paired'},
+      {label:"Three or more groups", next:'multi_paired'},
+      {label:"The relationship between two continuous variables", next:'corr_linear'},
+    ],
+  },
+  two_paired: {
+    q: "Are the two groups the same subjects measured twice (or otherwise matched pairs), or independent subjects?",
+    options: [
+      {label:"Same subjects / matched pairs", next:'two_paired_normal'},
+      {label:"Independent subjects", next:'two_normal'},
+    ],
+  },
+  two_normal: {
+    q: "Does each group look roughly normally distributed? (Use \u201cCheck normality\u201d on the Analyze tab, or judge from a histogram if n is small.)",
+    options: [
+      {label:"Yes, both roughly normal", next:'two_variance'},
+      {label:"No, at least one is skewed / has outliers", result:'mwu'},
+      {label:"Not sure / n is too small to tell", result:'mwu'},
+    ],
+  },
+  two_variance: {
+    q: "Do the two groups have roughly similar variance (spread)?",
+    options: [
+      {label:"Yes, similar spread", result:'student'},
+      {label:"No, quite different spread", result:'welch'},
+      {label:"Not sure", result:'welch'},
+    ],
+  },
+  two_paired_normal: {
+    q: "Do the paired differences look roughly normally distributed?",
+    options: [
+      {label:"Yes", result:'pairedt'},
+      {label:"No / not sure", result:'wilcoxon'},
+    ],
+  },
+  multi_paired: {
+    q: "Are the same subjects measured across all conditions (repeated measures), or independent groups?",
+    options: [
+      {label:"Independent groups", next:'multi_normal'},
+      {label:"Repeated measures on the same subjects", result:'repeated_note'},
+    ],
+  },
+  multi_normal: {
+    q: "Do all groups look roughly normally distributed with similar variance?",
+    options: [
+      {label:"Yes", result:'anova'},
+      {label:"No / not sure", result:'kw'},
+    ],
+  },
+  corr_linear: {
+    q: "Does the relationship look roughly linear (or do you specifically want to model one variable predicting the other)?",
+    options: [
+      {label:"Roughly linear, and I want the equation of the line", result:'linreg'},
+      {label:"I just want to know how strongly they're related, roughly linear", result:'pearson'},
+      {label:"Related but not linear (monotonic — consistently up or down)", result:'spearman'},
+    ],
+  },
+};
+const GUIDE_RESULTS = {
+  student: {name:"Student's unpaired t-test", why:"Two independent groups, both roughly normal, with similar variance. This is the classic, most powerful choice when its assumptions hold."},
+  welch: {name:"Welch's unpaired t-test", why:"Two independent groups that look normal but with unequal variance. Welch's version doesn't assume equal spread, so it's the safer default even when in doubt."},
+  mwu: {name:"Mann-Whitney U test", why:"Two independent groups where normality is doubtful. This test compares ranks rather than means, so it isn't thrown off by skew or outliers."},
+  pairedt: {name:"Paired t-test", why:"Matched/repeated measurements whose differences look normal — this test looks at the within-subject change directly, which is usually more powerful than treating the groups as independent."},
+  wilcoxon: {name:"Wilcoxon signed-rank test", why:"Matched/repeated measurements where the differences aren't normally distributed — the non-parametric counterpart to the paired t-test."},
+  anova: {name:"One-way ANOVA", why:"Three or more independent groups, all roughly normal with similar variance. Follow it with a corrected pairwise test (e.g. Bonferroni) to see which specific groups differ."},
+  kw: {name:"Kruskal-Wallis test", why:"Three or more independent groups where normality is doubtful — a rank-based extension of Mann-Whitney to more than two groups."},
+  pearson: {name:"Pearson correlation", why:"Two continuous variables with a roughly linear relationship. Gives you r, the strength and direction of a linear association."},
+  spearman: {name:"Spearman correlation", why:"Two variables that move together but not in a straight line — Spearman uses ranks, so it captures any consistently increasing or decreasing relationship."},
+  linreg: {name:"Simple linear regression", why:"Use this when you want the actual equation (slope & intercept) describing how one variable predicts the other, not just the strength of association."},
+  repeated_note: {name:"Repeated-measures ANOVA (mixed model)", why:"Bench doesn't compute this one yet — it needs to account for correlation between repeated measurements on the same subject. For now, consider a paired approach per pair of timepoints, or a dedicated stats package for a proper repeated-measures / mixed-effects model."},
+};
+let guideNode = 'start';
+let guidePath = [];
+function renderGuideTab(){
+  const el = document.getElementById('tab-guide');
+  el.innerHTML = `
+    <div class="page-head">
+      <h1 class="page-title">Test guide</h1>
+      <p class="page-desc">Answer a couple of questions and land on a recommended test, with the reasoning behind it.</p>
+    </div>
+    <div class="panel" id="guide-panel"></div>
+    <div class="panel">
+      <h3>Quick reference</h3>
+      <table class="stat-table">
+        <thead><tr><th>Situation</th><th>Parametric</th><th>Non-parametric</th></tr></thead>
+        <tbody>
+          <tr><td>2 independent groups</td><td>Student's / Welch's t-test</td><td>Mann-Whitney U</td></tr>
+          <tr><td>2 paired / matched groups</td><td>Paired t-test</td><td>Wilcoxon signed-rank</td></tr>
+          <tr><td>3+ independent groups</td><td>One-way ANOVA</td><td>Kruskal-Wallis</td></tr>
+          <tr><td>Association between 2 variables</td><td>Pearson correlation</td><td>Spearman correlation</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+  renderGuideNode();
+}
+function renderGuideNode(){
+  const panel = document.getElementById('guide-panel');
+  const crumbs = guidePath.length? `<div class="page-desc" style="margin-bottom:10px;">${guidePath.map(s=>escapeHtml(s)).join(' → ')}</div>` : '';
+  const restartBtn = guidePath.length? `<button class="btn ghost small" id="guide-restart" style="margin-top:12px;">Start over</button>` : '';
+
+  if(guideNode && GUIDE_RESULTS[guideNode]){
+    const r = GUIDE_RESULTS[guideNode];
+    panel.innerHTML = `${crumbs}
+      <div class="callout note">
+        <strong>Recommended: ${escapeHtml(r.name)}</strong><br>${escapeHtml(r.why)}
+      </div>
+      ${restartBtn}`;
+  } else {
+    const node = GUIDE_TREE[guideNode];
+    panel.innerHTML = `${crumbs}
+      <h3 style="margin-bottom:12px;">${escapeHtml(node.q)}</h3>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:8px;">
+        ${node.options.map((o,i)=>`<button class="btn" data-opt="${i}" style="text-align:left;justify-content:flex-start;">${escapeHtml(o.label)}</button>`).join('')}
+      </div>
+      ${restartBtn}`;
+    panel.querySelectorAll('[data-opt]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const opt = node.options[+btn.dataset.opt];
+        guidePath.push(node.q.length>60? node.q.slice(0,57)+'…' : node.q);
+        guideNode = opt.next || opt.result;
+        renderGuideNode();
+      });
+    });
+  }
+  const restart = document.getElementById('guide-restart');
+  if(restart) restart.addEventListener('click', ()=>{ guideNode='start'; guidePath=[]; renderGuideNode(); });
+}
+
+/* =========================================================================
+   ASK TAB — talks to Claude via the `sample` capability
+   ========================================================================= */
+let sampleNamespace = undefined; // undefined = not yet checked, null = unavailable
+async function getSample(){
+  if(sampleNamespace===undefined){
+    try{ sampleNamespace = await claude.use('sample'); }catch(e){ sampleNamespace = null; }
+  }
+  return sampleNamespace;
+}
+function datasetContextSummary(){
+  const lines = state.groups.map(g=>{
+    const vals = resolvedValues(g);
+    const ndN = ndCount(g);
+    if(vals.length===0) return `- ${g.name}: no data yet`;
+    return `- ${g.name}: n=${vals.length}${ndN?` (${ndN} non-detect, substituted at LOD/2=${state.lod/2})`:''}, mean=${fmt(mean(vals))}, sd=${vals.length>1?fmt(sd(vals)):'n/a'}`;
+  });
+  let extra = '';
+  if(state.analysis.lastResult){
+    extra = `\nMost recent test run in the app: ${state.analysis.lastResult.testLabel}, p=${fmtP(state.analysis.lastResult.p)}.`;
+  }
+  return `Dataset currently loaded in the app:\n${lines.join('\n')}${extra}`;
+}
+function renderAskTab(){
+  const el = document.getElementById('tab-ask');
+  el.innerHTML = `
+    <div class="page-head">
+      <h1 class="page-title">Ask</h1>
+      <p class="page-desc">Ask a real question about your data or which test fits. This is grounded in whatever's currently in your Data tab.</p>
+    </div>
+    <div class="panel">
+      <div id="ask-thread" style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px;"></div>
+      <div class="row">
+        <textarea id="ask-input" rows="2" style="flex:1;font-family:var(--font-ui);" placeholder="e.g. I have 3 diet groups with n=6 each, one looks skewed — what should I run?"></textarea>
+        <button class="btn primary" id="ask-send" style="align-self:flex-end;">Ask</button>
+      </div>
+      <div id="ask-status" class="page-desc" style="margin-top:8px;"></div>
+    </div>
+  `;
+  renderAskThread();
+  document.getElementById('ask-send').addEventListener('click', sendAskQuestion);
+  document.getElementById('ask-input').addEventListener('keydown', e=>{
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendAskQuestion(); }
+  });
+  checkAskAvailability();
+}
+async function checkAskAvailability(){
+  const s = await getSample();
+  const status = document.getElementById('ask-status');
+  const sendBtn = document.getElementById('ask-send');
+  if(!s){
+    if(status) status.textContent = "Ask isn't available in this view.";
+    if(sendBtn) sendBtn.disabled = true;
+  }
+}
+function renderAskThread(){
+  const thread = document.getElementById('ask-thread');
+  if(!thread) return;
+  thread.innerHTML = state.ask.history.map(m=>`
+    <div style="background:${m.role==='user'?'var(--paper-grid)':'var(--accent-soft)'};padding:10px 13px;border-radius:8px;font-size:13px;line-height:1.55;white-space:pre-wrap;">
+      <strong style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.4px;color:var(--ink-soft);display:block;margin-bottom:3px;">${m.role==='user'?'You':'Bench'}</strong>${escapeHtml(m.content)}
+    </div>`).join('');
+}
+async function sendAskQuestion(){
+  const input = document.getElementById('ask-input');
+  const q = input.value.trim();
+  if(!q) return;
+  const sendBtn = document.getElementById('ask-send');
+  const status = document.getElementById('ask-status');
+  const s = await getSample();
+  if(!s){ status.textContent = "Ask isn't available in this view."; return; }
+
+  state.ask.history.push({role:'user', content:q});
+  input.value='';
+  renderAskThread();
+  sendBtn.disabled = true;
+  status.textContent = 'Thinking…';
+
+  const prompt = `You are helping a researcher inside a lightweight statistics app called Bench. `
+    + `Answer their question about which statistical test to use, or how to interpret a result. Be direct and specific, reference their actual numbers where relevant, and keep it to a few short paragraphs — this renders in a small chat panel, not a report.\n\n`
+    + datasetContextSummary() + `\n\nQuestion: ${q}`;
+
+  state.ask.history.push({role:'assistant', content:''});
+  renderAskThread();
+  const thread = document.getElementById('ask-thread');
+
+  try{
+    const result = await s(prompt, {
+      modelTier: 'default',
+      cache: false,
+      onText: ({text})=>{
+        state.ask.history[state.ask.history.length-1].content = text;
+        renderAskThread();
+      },
+    });
+    state.ask.history[state.ask.history.length-1].content = result.text;
+    renderAskThread();
+    status.textContent = '';
+  }catch(err){
+    const code = err && err.code;
+    let msg = "Something went wrong — try again.";
+    if(code==='not_granted'){ msg = "Ask isn't allowed for this view."; sampleNamespace=null; }
+    else if(code==='rate_limited') msg = "Too many requests right now — wait a moment and try again.";
+    else if(code==='cancelled') msg = '';
+    state.ask.history[state.ask.history.length-1].content = err && err.text ? err.text : (msg || '');
+    renderAskThread();
+    status.textContent = msg;
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+buildShell();
+renderDataTab();
+
+</script>
+</body>
+</html>
